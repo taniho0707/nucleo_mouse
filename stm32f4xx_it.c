@@ -30,6 +30,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
 #include "main.hpp"
+#include "parameters.hpp"
+#include "const.hpp"
+#include "Timer.hpp"
+#include "Motor.hpp"
 
 /** @addtogroup Template_Project
   * @{
@@ -45,12 +49,16 @@
 void TIM2_IRQHandler(void){
 	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		/* Motor::addTotalDistance(DISTANCE_PULSE, E_MotorRight); */
+		Motor::addTotalDistance(0.268, E_MotorRight);
 	}
 }
 
 void TIM3_IRQHandler(void){
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET){
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		/* Motor::addTotalDistance(DISTANCE_PULSE, E_MotorLeft); */
+		Motor::addTotalDistance(0.268, E_MotorLeft);
 	}
 }
 
@@ -152,9 +160,9 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
-{
-  TimingDelay_Decrement();
+void SysTick_Handler(void){
+	/* TimingDelay_Decrement(); */
+	Timer::wait_ms_decrement();
 }
 
 /******************************************************************************/

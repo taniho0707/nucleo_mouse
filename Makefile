@@ -34,7 +34,7 @@ all: libstm32f401xx startup bin/main.bin
 bin/main.bin: $(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst %.cpp,%.o,$(wildcard *.cpp)) $(STARTUP_DIR)/startup_stm32f401xx.o ../STM32F4xx_DSP_StdPeriph_Lib/Libraries/libstm32f401xx.a
 	$(LD) $(LDFLAGS) $(TARGET_ARCH) $^ -o bin/main.elf
 	$(OBJCOPY) -O binary bin/main.elf bin/main.bin
-	etags *.[ch]
+	etags *.[ch]*
 
 LIB_OBJS = $(sort \
  $(patsubst %.c,%.o,$(wildcard ../STM32F4xx_DSP_StdPeriph_Lib/Libraries/STM32F4xx_StdPeriph_Driver/src/*.c)))
