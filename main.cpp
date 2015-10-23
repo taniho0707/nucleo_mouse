@@ -5,61 +5,6 @@
 RCC_ClocksTypeDef RCC_Clocks;
 
 
-void initLED(){
-	GPIO_InitTypeDef GPIO_InitStructure;
-/* Enable the GPIOA peripheral */ 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-/* Configure MCO1 pin(PA5) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
-
-
-
-
-// void initADC(){
-// 	GPIO_InitTypeDef GPIO_InitStructure;
-// 	ADC_InitTypeDef ADC_InitStructure;
-// 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-// 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-
-// 	GPIO_StructInit(&GPIO_InitStructure);
-// 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-// 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-// 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-// 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-// 	ADC_Cmd(ADC1, DISABLE);
-// 	ADC_DeInit();
-
-// 	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-// 	ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-// 	ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
-// 	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-// 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-// 	ADC_InitStructure.ADC_NbrOfConversion = 1;
-// 	ADC_Init(ADC1, &ADC_InitStructure);
-// 	ADC_Cmd(ADC1, ENABLE);
-// 	Delay(100);
-// }
-
-// uint16_t getAD1_10(void){
-// 	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_56Cycles);
-// 	ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
-//     ADC_SoftwareStartConv(ADC1);
-//     while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) != SET);
-// 	GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
-// 	uint16_t retval = ADC_GetConversionValue(ADC1);
-//     return retval;
-// }
 
 
 int main(void){
@@ -70,60 +15,58 @@ int main(void){
 	Motor::initialize();
 	Usart::initialize();
 	Switch::initialize();
+	Battery::initialize();
+	SensorWall::initialize();
 
-	initLED();
-	// initADC();
-	GPIO_SetBits(GPIOA, GPIO_Pin_5);
+	Led user_led(GPIOA, GPIO_Pin_5);
+
+	user_led.on();
 	// GPIO_ResetBits(GPIOB, GPIO_Pin_7); // SensorLED
-	// USART_myprintf(USART2, "Hello!\n");
 	Timer::wait_ms(1000);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+	user_led.off();
 	Timer::wait_ms(1000);
 
 	Usart::printf("Hello, nucleo mouse!\n");
+	Battery::rescanVoltage();
+	Usart::printf("\tVoltage: %f V\n", Battery::getVoltage());
+	if(Battery::getVoltage() < 6.8){
+		while(1){
+			user_led.on();
+			Timer::wait_ms(100);
+			user_led.off();
+			Timer::wait_ms(100);
+		}
+	}
+
+	SensorWall::start();
+	Timer::wait_ms(500);
+
+	// while(1){
+	// 	Usart::printf("FL:%d, L:%d, R:%d, FR:%d\n", SensorWall::getValue(E_LFront), SensorWall::getValue(E_Left), SensorWall::getValue(E_Right), SensorWall::getValue(E_RFront));
+	// 	Timer::wait_ms(100);
+	// }
 
 	Motor::excitate();
 	while(Switch::isPushing());
-	GPIO_SetBits(GPIOA, GPIO_Pin_5);
+	user_led.on();
 	Timer::wait_ms(1000);
-	Motor::pulseRun(100, 630);
+	// Motor::pulseRun(100, 630);
+	// Motor::pulseTurn(20, 360*3);
 	Timer::wait_ms(1000);
 	Motor::disexcitate();
 
 	volatile uint16_t tmp = 0;
 	while (1){
 		if(tmp){
-			GPIO_SetBits(GPIOA, GPIO_Pin_5);
+			user_led.on();
 			tmp = 0;
 		} else {
-			GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+			user_led.off();
 			tmp = 1;
 		}
 		Timer::wait_ms(500);
 	}
 }
-
-// /**
-//   * @brief  Inserts a delay time.
-//   * @param  nTime: specifies the delay time length, in milliseconds.
-//   * @retval None
-//   */
-// void Delay(__IO uint32_t nTime){
-// 	uwTimingDelay = nTime;
-
-// 	while(uwTimingDelay != 0);
-// }
-
-// /**
-//   * @brief  Decrements the TimingDelay variable.
-//   * @param  None
-//   * @retval None
-//   */
-// void TimingDelay_Decrement(void){
-// 	if (uwTimingDelay != 0x00){
-// 		uwTimingDelay--;
-// 	}
-// }
 
 #ifdef  USE_FULL_ASSERT
 /**

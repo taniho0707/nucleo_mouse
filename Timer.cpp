@@ -30,5 +30,6 @@ void Timer::wait_ms_decrement(){
 }
 
 void Timer::interrupt(){
-	
+	wait_ms_decrement();
+	SensorWall::interrupt();
 }

@@ -9,8 +9,8 @@
 /*  機体設定                          */
 /**************************************/
 
-// //タイヤ直径(mm)
-// #define TIRE_R 22
+//タイヤ直径(mm)
+#define TIRE_R (17.061)
 
 //タイヤ円周(mm)
 #define TIRE_ROUND (53.6)//(47.125)
@@ -56,8 +56,8 @@
 //機体重量(kg)
 #define WEIGHT 0.100
 
-//トレッド幅(m)
-#define TREAD 0.0685//0.063
+//トレッド幅(mm)
+#define TREAD (24.0)
 
 //FF制御時のK_pゲイン
 #define GAIN_IDEAL 0

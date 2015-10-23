@@ -162,7 +162,8 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void){
 	/* TimingDelay_Decrement(); */
-	Timer::wait_ms_decrement();
+	Timer::interrupt();
+	/* Timer::wait_ms_decrement(); */
 }
 
 /******************************************************************************/

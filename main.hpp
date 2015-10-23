@@ -9,6 +9,9 @@
 #include "Motor.hpp"
 #include "Usart.hpp"
 #include "Switch.hpp"
+#include "Battery.hpp"
+#include "Led.hpp"
+#include "SensorWall.hpp"
 
 
 /* Exported types ------------------------------------------------------------*/

@@ -34,6 +34,8 @@ private:
 
 	static float total_distance[2];
 
+	static char is_current_forward[2];
+
 	Motor();
 
 public:
@@ -105,10 +107,14 @@ public:
 
 	static float getTotalDistanceGravity();
 
+	static float getTotalDistanceAngle();
+
 	static float addTotalDistance(float t, EMotorPosition side);
 
 
 	static void pulseRun(float max_vel, float distance);
+
+	static void pulseTurn(float max_vel, float degree);
 
 	/**
 	 * @brief 加速をする<br>

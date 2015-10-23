@@ -6,6 +6,7 @@
 #define INCLUDED_TIMER_HPP
 
 #include "stm32f4xx.h"
+#include "SensorWall.hpp"
 
 /**
  * 正確に秒数を計ることを担ったクラス

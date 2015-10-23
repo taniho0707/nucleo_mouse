@@ -16,6 +16,8 @@ float Motor::target_velocity_gravity = 0;
 
 float Motor::total_distance[2] = {0.0, 0.0};
 
+char Motor::is_current_forward[2] = {1, 1};
+
 
 void Motor::initialize(){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
@@ -40,7 +42,6 @@ void Motor::initialize(){
 	GPIO_initstr.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOA, &GPIO_initstr);
 
-		// とりあえずの周波数(1kHz?)
 	TIM_initstr.TIM_Period = 420-1;
 	TIM_initstr.TIM_Prescaler = 200-1;
 	TIM_initstr.TIM_ClockDivision = 0;
@@ -107,6 +108,7 @@ void Motor::changeToForward(EMotorPosition side){
 		GPIO_ResetBits(GPIOA, GPIO_Pin_7);
 	else
 		GPIO_SetBits(GPIOB, GPIO_Pin_0);
+	is_current_forward[side] = 1;
 }
 
 void Motor::changeToBackward(EMotorPosition side){
@@ -114,6 +116,7 @@ void Motor::changeToBackward(EMotorPosition side){
 		GPIO_SetBits(GPIOA, GPIO_Pin_7);
 	else
 		GPIO_ResetBits(GPIOB, GPIO_Pin_0);
+	is_current_forward[side] = 0;
 }
 
 void Motor::setSpeed(EMotorPosition side, float vel){
@@ -196,8 +199,19 @@ float Motor::getTotalDistanceGravity(){
 	return (total_distance[E_MotorLeft]+total_distance[E_MotorRight])/2.0;
 }
 
+float Motor::getTotalDistanceAngle(){
+	float tmp = 0;
+	tmp = total_distance[E_MotorLeft] - total_distance[E_MotorRight];
+	if(tmp < 0) tmp *= -1;
+	return tmp*57.295/28.08;
+	// return tmp*57.295/TREAD;
+}
+
 float Motor::addTotalDistance(float t, EMotorPosition side){
-	total_distance[side] += t;
+	if(is_current_forward[side])
+		total_distance[side] += t;
+	else
+		total_distance[side] -= t;
 	return total_distance[side];
 }
 
@@ -212,6 +226,20 @@ void Motor::pulseRun(float max_vel, float distance){
 		Usart::printf("%f, %f\n", total_distance[0], total_distance[1]);
 	}
 	// Usart::printf("%f\n", getTotalDistanceGravity());
+	stopRotate();
+	return;
+}
+
+void Motor::pulseTurn(float max_vel_deg, float distance){
+	resetTotalDistance();
+	setSpeed(E_MotorLeft, -1*max_vel_deg);
+	setSpeed(E_MotorRight, max_vel_deg);
+	startRotate();
+	while(distance > getTotalDistanceAngle()){
+		Timer::wait_ms(1);
+		// Usart::printf("%f\n", getTotalDistanceAngle());
+	}
+	// Usart::printf("%f\n", getTotalDistanceAngle());
 	stopRotate();
 	return;
 }
