@@ -17,6 +17,7 @@ float Motor::target_velocity_gravity = 0;
 float Motor::total_distance[2] = {0.0, 0.0};
 
 char Motor::is_current_forward[2] = {1, 1};
+char Motor::is_working = 0;
 
 
 void Motor::initialize(){
@@ -55,9 +56,9 @@ void Motor::initialize(){
 	TIM_OC_initstr.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OC_initstr.TIM_Pulse = 210-1;
 	TIM_OC1Init(TIM2,&TIM_OC_initstr);
-	TIM_OC1PreloadConfig(TIM2,TIM_OCPreload_Disable);
+	TIM_OC1PreloadConfig(TIM2,TIM_OCPreload_Enable);
 	TIM_OC1Init(TIM3,&TIM_OC_initstr);
-	TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Disable);
+	TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
 
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_TIM2);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_TIM3);
@@ -96,11 +97,13 @@ void Motor::disexcitate(){
 void Motor::startRotate(){
 	TIM_Cmd(TIM2, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);
+	is_working = 1;
 }
 
 void Motor::stopRotate(){
 	TIM_Cmd(TIM2, DISABLE);
 	TIM_Cmd(TIM3, DISABLE);
+	is_working = 0;
 }
 
 void Motor::changeToForward(EMotorPosition side){
@@ -129,11 +132,9 @@ void Motor::setSpeed(EMotorPosition side, float vel){
 		velocity = -1 * vel;
 	}
 	
-	target_velocity[side] = velocity;
-	count_of_clear[side] = static_cast<int>(420000.0*TIRE_ROUND/velocity/4);
-
+	count_of_clear[side] = static_cast<int>(12506667.0/velocity*2);
 	TIM_initstr.TIM_Period = count_of_clear[side]/12000 - 1;
-	TIM_initstr.TIM_Prescaler = count_of_clear[side]/(TIM_initstr.TIM_Period+1) - 1;
+	TIM_initstr.TIM_Prescaler = 12000 - 1;
 	TIM_initstr.TIM_ClockDivision = 0;
 	TIM_initstr.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_initstr.TIM_RepetitionCounter = 0;
@@ -146,16 +147,21 @@ void Motor::setSpeed(EMotorPosition side, float vel){
 	if(side == E_MotorLeft){
 		TIM_TimeBaseInit(TIM3, &TIM_initstr);
 		TIM_OC1Init(TIM3,&TIM_OC_initstr);
-		TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Disable);
+		TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
 	} else {
 		TIM_TimeBaseInit(TIM2, &TIM_initstr);
 		TIM_OC1Init(TIM2,&TIM_OC_initstr);
-		TIM_OC1PreloadConfig(TIM2,TIM_OCPreload_Disable);
+		TIM_OC1PreloadConfig(TIM2,TIM_OCPreload_Enable);
 	}
 }
 
-int Motor::interrupt(EMotorPosition side){
-	
+int Motor::interrupt(){
+	if(is_working){
+		setSpeed(E_MotorLeft, target_velocity[E_MotorLeft]);
+		setSpeed(E_MotorRight, target_velocity[E_MotorRight]);
+		// setSpeed(E_MotorLeft, target_velocity[E_MotorLeft]-0.8*SensorWall::getCorrection(100));
+		// setSpeed(E_MotorRight, target_velocity[E_MotorRight]+0.8*SensorWall::getCorrection(100));
+	}
 }
 
 
@@ -219,13 +225,19 @@ void Motor::pulseRun(float max_vel, float distance){
 	resetTotalDistance();
 	setSpeed(E_MotorLeft, max_vel);
 	setSpeed(E_MotorRight, max_vel);
+	target_velocity[E_MotorLeft] = max_vel;
+	target_velocity[E_MotorRight] = max_vel;
 	startRotate();
 	while(distance > getTotalDistanceGravity()){
+		// setSpeed(E_MotorLeft, max_vel+GAIN_KABE_L*SensorWall::getCorrection(100));
+		// setSpeed(E_MotorRight, max_vel-GAIN_KABE_R*SensorWall::getCorrection(100));
 		Timer::wait_ms(1);
 		// Usart::printf("%f\n", getTotalDistanceGravity());
-		Usart::printf("%f, %f\n", total_distance[0], total_distance[1]);
+		// Usart::printf("%d, %d, %d, %d\n", SensorWall::getCorrection(100), 0, SensorWall::getValue(E_Left), SensorWall::getValue(E_Right));
 	}
 	// Usart::printf("%f\n", getTotalDistanceGravity());
+	target_velocity[E_MotorLeft] = 0;
+	target_velocity[E_MotorRight] = 0;
 	stopRotate();
 	return;
 }
@@ -234,12 +246,16 @@ void Motor::pulseTurn(float max_vel_deg, float distance){
 	resetTotalDistance();
 	setSpeed(E_MotorLeft, -1*max_vel_deg);
 	setSpeed(E_MotorRight, max_vel_deg);
+	target_velocity[E_MotorLeft] = -1*max_vel_deg;
+	target_velocity[E_MotorRight] = max_vel_deg;
 	startRotate();
 	while(distance > getTotalDistanceAngle()){
 		Timer::wait_ms(1);
 		// Usart::printf("%f\n", getTotalDistanceAngle());
 	}
 	// Usart::printf("%f\n", getTotalDistanceAngle());
+	target_velocity[E_MotorLeft] = 0;
+	target_velocity[E_MotorRight] = 0;
 	stopRotate();
 	return;
 }

@@ -33,10 +33,10 @@
 #define SENSOR_LIM_FR 910
 
 //センサーリファレンス値
-#define SENSOR_REF_FL 2580
-#define SENSOR_REF_L 1385
-#define SENSOR_REF_R 1390
-#define SENSOR_REF_FR 2360
+#define SENSOR_REF_FL 100
+#define SENSOR_REF_L 7
+#define SENSOR_REF_R 49
+#define SENSOR_REF_FR 100
 
 #define SENSOR_OBL_REF_L 890
 #define SENSOR_OBL_REF_R 780
@@ -66,35 +66,11 @@
 #define MAX_WALL_CORRECTION 1000//300
 
 //壁ゲインK_p
-#define GAIN_KABE_R 0.01//0.006
-#define GAIN_KABE_L 0.01//0.006
-#define GAIN_KABE 0.007//0.01	//竹本制御の時は2，今井制御の時は0.01
+#define GAIN_KABE_R 1000.0
+#define GAIN_KABE_L 1000.0
 
 //壁ゲインK_i
 #define GAIN_KABE_INTEGRAL 0.05
-
-//FB制御のエンコーダK_pゲイン
-#define GAIN_ENCODER_R 100
-#define GAIN_ENCODER_L 100
-#define GAIN_ENCODER 100
-
-//FB制御のエンコーダK_iゲイン
-#define GAIN_INTEGRAL_R 230
-#define GAIN_INTEGRAL_L 230
-#define GAIN_INTEGRAL 200
-
-//FB制御のエンコーダ角速度成分のK_pゲイン
-#define GAIN_RAD 0
-
-//FB制御のジャイロK_pゲイン
-#define GAIN_GYRO_R 30//0
-#define GAIN_GYRO_L 30//0
-#define GAIN_GYRO 30//80//60
-
-//FB制御のジャイロK_iゲイン
-#define GAIN_GYRO_INTEGRAL_R 0.5//.05//3
-#define GAIN_GYRO_INTEGRAL_L 0.5//.05//3
-#define GAIN_GYRO_INTEGRAL 5.5//4//2	//竹本制御の時は0.2，今井制御の時は2
 
 //デフォルトの直進加速度
 #define ACCEL 6//1.5

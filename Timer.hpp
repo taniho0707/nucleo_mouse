@@ -7,6 +7,7 @@
 
 #include "stm32f4xx.h"
 #include "SensorWall.hpp"
+#include "Motor.hpp"
 
 /**
  * 正確に秒数を計ることを担ったクラス

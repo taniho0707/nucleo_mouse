@@ -42,7 +42,7 @@ int main(void){
 	Timer::wait_ms(500);
 
 	// while(1){
-	// 	Usart::printf("FL:%d, L:%d, R:%d, FR:%d\n", SensorWall::getValue(E_LFront), SensorWall::getValue(E_Left), SensorWall::getValue(E_Right), SensorWall::getValue(E_RFront));
+	// 	Usart::printf("FL:%4d, L:%4d, R:%4d, FR:%4d\n", SensorWall::getValue(E_LFront), SensorWall::getValue(E_Left), SensorWall::getValue(E_Right), SensorWall::getValue(E_RFront));
 	// 	Timer::wait_ms(100);
 	// }
 
@@ -50,8 +50,28 @@ int main(void){
 	while(Switch::isPushing());
 	user_led.on();
 	Timer::wait_ms(1000);
-	// Motor::pulseRun(100, 630);
-	// Motor::pulseTurn(20, 360*3);
+	user_led.off();
+	Motor::pulseRun(50, 6300);
+	// Motor::startRotate();
+	// TIM_TimeBaseInitTypeDef TIM_initstr;
+	// TIM_OCInitTypeDef TIM_OC_initstr;
+	// TIM_initstr.TIM_Period = 12500 - 1;
+	// TIM_initstr.TIM_Prescaler = 100 - 1;
+	// TIM_initstr.TIM_ClockDivision = 0;
+	// TIM_initstr.TIM_CounterMode = TIM_CounterMode_Up;
+	// TIM_OC_initstr.TIM_OCMode = TIM_OCMode_PWM1;
+	// TIM_OC_initstr.TIM_OCPolarity = TIM_OCPolarity_High;
+	// TIM_OC_initstr.TIM_OutputState = TIM_OutputState_Enable;
+	// TIM_OC_initstr.TIM_Pulse = 6250 - 1;
+	// TIM_TimeBaseInit(TIM3, &TIM_initstr);
+	// TIM_OC1Init(TIM3,&TIM_OC_initstr);
+	// TIM_TimeBaseInit(TIM2, &TIM_initstr);
+	// TIM_OC1Init(TIM2,&TIM_OC_initstr);
+	// Timer::wait_ms(2000);
+	// Motor::setSpeed(E_MotorLeft, 0);
+	// Motor::setSpeed(E_MotorRight, 0);
+	// Motor::stopRotate();
+	// Motor::pulseTurn(140, 3600);
 	Timer::wait_ms(1000);
 	Motor::disexcitate();
 

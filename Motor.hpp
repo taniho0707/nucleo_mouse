@@ -35,6 +35,7 @@ private:
 	static float total_distance[2];
 
 	static char is_current_forward[2];
+	static char is_working;
 
 	Motor();
 
@@ -65,7 +66,7 @@ public:
 	 * @brief モーターの速度を調整する<br>
 	 * この関数はPWMのカウンタリセットがかかるたびに左右ずつ呼ばれる必要がある。
 	 */
-	static int interrupt(EMotorPosition side);
+	static int interrupt();
 
 
 	/**
